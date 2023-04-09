@@ -10,4 +10,5 @@ type Todo struct {
 type TodoRepository interface {
 	GetAll() ([]Todo, error)
 	GetById(int) (*Todo, error)
+	CreateTodo(todo Todo) (*Todo, error)
 }

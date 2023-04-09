@@ -22,10 +22,33 @@ func (r todoRepositoryDB) GetAll() ([]Todo, error) {
 
 func (r todoRepositoryDB) GetById(id int) (*Todo, error) {
 	todo := Todo{}
-	query := "SELECT id, body, complete, create_date FROM todo WHERE id = ?"
+	query := `
+				SELECT id, body, complete, create_date 
+				FROM todo 
+				WHERE id = ?
+			`
 	err := r.db.Get(&todo, query, id)
 	if err != nil {
 		return nil, err
 	}
+	return &todo, nil
+}
+
+func (r todoRepositoryDB) CreateTodo(todo Todo) (*Todo, error) {
+	query := `
+				INSERT INTO todo(id, body, complete, create_date) 
+				VALUE (?, ?, ?, ?)
+			`
+	_, err := r.db.Exec(
+		query,
+		todo.Id,
+		todo.Body,
+		todo.Complete,
+		todo.CeateDate,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &todo, nil
 }
