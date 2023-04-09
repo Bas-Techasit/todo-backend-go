@@ -32,12 +32,9 @@ func main() {
 	app.Post("/todo", todoHandler.NewTodo)
 	app.Put("/todo/:todoId", todoHandler.UpdateTodo)
 	app.Delete("/todo/:todoId", todoHandler.DeleteTodo)
-	// router.HandleFunc("/todos", todoHandler.GetTodos).Methods(http.MethodGet)
-	// router.HandleFunc("/todo/{todoId:[0-9]+}", todoHandler.GetTodo).Methods(http.MethodGet)
 
 	logs.Info("Todo server is running on port " + viper.GetString("app.port"))
 	app.Listen(":" + viper.GetString("app.port"))
-	// http.ListenAndServe(fmt.Sprintf(":%v", viper.GetInt("app.port")), router)
 
 }
 

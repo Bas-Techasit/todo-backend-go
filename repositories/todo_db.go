@@ -23,7 +23,7 @@ func (r todoRepositoryDB) GetAll() ([]Todo, error) {
 	return todos, nil
 }
 
-func (r todoRepositoryDB) GetById(id int) (*Todo, error) {
+func (r todoRepositoryDB) GetById(id string) (*Todo, error) {
 	todo := Todo{}
 	query := `
 				SELECT id, body, complete, create_date 
@@ -56,7 +56,7 @@ func (r todoRepositoryDB) CreateTodo(todo Todo) (*Todo, error) {
 	return &todo, nil
 }
 
-func (r todoRepositoryDB) UpdateTodo(id int, body string, isCompleted bool) (*Todo, error) {
+func (r todoRepositoryDB) UpdateTodo(id string, body string, isCompleted bool) (*Todo, error) {
 	query := `
 				UPDATE todo 
 				SET body = ?, complete = ?
@@ -76,7 +76,7 @@ func (r todoRepositoryDB) UpdateTodo(id int, body string, isCompleted bool) (*To
 	return &todo, nil
 }
 
-func (r todoRepositoryDB) DeleteTodo(id int) error {
+func (r todoRepositoryDB) DeleteTodo(id string) error {
 	query := `
 				DELETE FROM todo
 				WHERE id = ?

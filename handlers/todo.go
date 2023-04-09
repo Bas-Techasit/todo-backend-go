@@ -23,10 +23,7 @@ func (h todoHandler) GetTodos(c *fiber.Ctx) error {
 }
 
 func (h todoHandler) GetTodo(c *fiber.Ctx) error {
-	todoId, err := c.ParamsInt("todoId")
-	if err != nil {
-		return fiber.ErrBadRequest
-	}
+	todoId := c.Params("todoId")
 
 	todo, err := h.todoSrv.GetTodo(todoId)
 	if err != nil {
@@ -52,14 +49,10 @@ func (h todoHandler) NewTodo(c *fiber.Ctx) error {
 }
 
 func (h todoHandler) UpdateTodo(c *fiber.Ctx) error {
-	todoId, err := c.ParamsInt("todoId")
-	if err != nil {
-		return fiber.ErrBadRequest
-	}
+	todoId := c.Params("todoId")
 
 	todo := services.EditTodoRequest{}
-	err = c.BodyParser(&todo)
-
+	err := c.BodyParser(&todo)
 	if err != nil {
 		return fiber.ErrUnprocessableEntity
 	}
@@ -73,11 +66,6 @@ func (h todoHandler) UpdateTodo(c *fiber.Ctx) error {
 }
 
 func (h todoHandler) DeleteTodo(c *fiber.Ctx) error {
-	todoId, err := c.ParamsInt("todoId")
-	if err != nil {
-		return fiber.ErrBadRequest
-	}
-
+	todoId := c.Params("todoId")
 	return h.todoSrv.DeleteTodo(todoId)
-
 }

@@ -7,6 +7,7 @@ import (
 	"todo-backend/repositories"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type todoService struct {
@@ -35,7 +36,7 @@ func (s todoService) GetTodos() ([]TodoResponse, error) {
 	return todoResponses, nil
 }
 
-func (s todoService) GetTodo(id int) (*TodoResponse, error) {
+func (s todoService) GetTodo(id string) (*TodoResponse, error) {
 	todo, err := s.todoRepo.GetById(id)
 	if err != nil {
 
@@ -63,7 +64,7 @@ func (s todoService) NewTodo(new NewTodoRequest) (*TodoResponse, error) {
 	}
 
 	todo := repositories.Todo{
-		Id:         new.Id,
+		Id:         uuid.NewString(),
 		Body:       new.Body,
 		Complete:   false,
 		CreateDate: time.Now(),
@@ -83,7 +84,7 @@ func (s todoService) NewTodo(new NewTodoRequest) (*TodoResponse, error) {
 	return &todoResponse, nil
 }
 
-func (s todoService) EditTodo(id int, e EditTodoRequest) (*TodoResponse, error) {
+func (s todoService) EditTodo(id string, e EditTodoRequest) (*TodoResponse, error) {
 	if e.Body == "" {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "body not empty")
 	}
@@ -103,14 +104,14 @@ func (s todoService) EditTodo(id int, e EditTodoRequest) (*TodoResponse, error) 
 	return &todoResponse, nil
 }
 
-func (s todoService) DeleteTodo(id int) error {
+func (s todoService) DeleteTodo(id string) error {
 	err := s.todoRepo.DeleteTodo(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return fiber.NewError(fiber.StatusNotFound, "todo not found")
 		}
-
 		return fiber.NewError(fiber.StatusInternalServerError, "unexpected error")
 	}
+
 	return nil
 }
