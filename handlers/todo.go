@@ -1,12 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
-	"net/http"
-	"strconv"
 	"todo-backend/services"
 
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 )
 
 type todoHandler struct {
@@ -17,23 +14,70 @@ func NewTodoHandler(todoSrv services.TodoService) todoHandler {
 	return todoHandler{todoSrv: todoSrv}
 }
 
-func (h todoHandler) GetTodos(w http.ResponseWriter, r *http.Request) {
+func (h todoHandler) GetTodos(c *fiber.Ctx) error {
 	todos, err := h.todoSrv.GetTodos()
 	if err != nil {
-		handleError(w, err)
-		return
+		return fiber.NewError(fiber.StatusInternalServerError)
 	}
-	w.Header().Set("content-type", "application/json")
-	json.NewEncoder(w).Encode(todos)
+	return c.JSON(todos)
 }
 
-func (h todoHandler) GetTodo(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.Atoi(mux.Vars(r)["todoId"])
-	todo, err := h.todoSrv.GetTodo(id)
+func (h todoHandler) GetTodo(c *fiber.Ctx) error {
+	todoId, err := c.ParamsInt("todoId")
 	if err != nil {
-		handleError(w, err)
-		return
+		return fiber.ErrBadRequest
 	}
-	w.Header().Set("content-type", "application/json")
-	json.NewEncoder(w).Encode(todo)
+
+	todo, err := h.todoSrv.GetTodo(todoId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "todo not found")
+	}
+
+	return c.JSON(todo)
+}
+
+func (h todoHandler) NewTodo(c *fiber.Ctx) error {
+	todo := services.NewTodoRequest{}
+	err := c.BodyParser(&todo)
+	if err != nil {
+		return fiber.ErrUnprocessableEntity
+	}
+
+	todoResponse, err := h.todoSrv.NewTodo(todo)
+	if err != nil {
+		return err
+	}
+	c.SendStatus(fiber.StatusCreated)
+	return c.JSON(todoResponse)
+}
+
+func (h todoHandler) UpdateTodo(c *fiber.Ctx) error {
+	todoId, err := c.ParamsInt("todoId")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	todo := services.EditTodoRequest{}
+	err = c.BodyParser(&todo)
+
+	if err != nil {
+		return fiber.ErrUnprocessableEntity
+	}
+
+	todoResponse, err := h.todoSrv.EditTodo(todoId, todo)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(todoResponse)
+}
+
+func (h todoHandler) DeleteTodo(c *fiber.Ctx) error {
+	todoId, err := c.ParamsInt("todoId")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	return h.todoSrv.DeleteTodo(todoId)
+
 }

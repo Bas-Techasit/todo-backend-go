@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 	"todo-backend/handlers"
@@ -11,7 +10,7 @@ import (
 	"todo-backend/services"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
@@ -26,13 +25,19 @@ func main() {
 	todoService := services.NewTodoService(todoRepository)
 	todoHandler := handlers.NewTodoHandler(todoService)
 
-	router := mux.NewRouter()
+	app := fiber.New()
 
-	router.HandleFunc("/todos", todoHandler.GetTodos).Methods(http.MethodGet)
-	router.HandleFunc("/todo/{todoId:[0-9]+}", todoHandler.GetTodo).Methods(http.MethodGet)
+	app.Get("/todos", todoHandler.GetTodos)
+	app.Get("/todo/:todoId", todoHandler.GetTodo)
+	app.Post("/todo", todoHandler.NewTodo)
+	app.Put("/todo/:todoId", todoHandler.UpdateTodo)
+	app.Delete("/todo/:todoId", todoHandler.DeleteTodo)
+	// router.HandleFunc("/todos", todoHandler.GetTodos).Methods(http.MethodGet)
+	// router.HandleFunc("/todo/{todoId:[0-9]+}", todoHandler.GetTodo).Methods(http.MethodGet)
 
 	logs.Info("Todo server is running on port " + viper.GetString("app.port"))
-	http.ListenAndServe(fmt.Sprintf(":%v", viper.GetInt("app.port")), router)
+	app.Listen(":" + viper.GetString("app.port"))
+	// http.ListenAndServe(fmt.Sprintf(":%v", viper.GetInt("app.port")), router)
 
 }
 
@@ -58,7 +63,7 @@ func initDB() *sqlx.DB {
 		viper.GetString("db.database"),
 	)
 
-	db, err := sqlx.Open(viper.GetString("db.driver"), dsn)
+	db, err := sqlx.Open(viper.GetString("db.driver"), dsn+"?parseTime=true")
 	if err != nil {
 		panic(err)
 	}
