@@ -14,7 +14,7 @@ func (r todoRepositoryDB) GetAll() ([]Todo, error) {
 	todos := []Todo{}
 	query := `
 				SELECT id, body, complete, create_date 
-				FROM todo"
+				FROM todo
 			`
 	err := r.db.Select(&todos, query)
 	if err != nil {
@@ -47,7 +47,7 @@ func (r todoRepositoryDB) CreateTodo(todo Todo) (*Todo, error) {
 		todo.Id,
 		todo.Body,
 		todo.Complete,
-		todo.CeateDate,
+		todo.CreateDate,
 	)
 	if err != nil {
 		return nil, err
@@ -56,15 +56,21 @@ func (r todoRepositoryDB) CreateTodo(todo Todo) (*Todo, error) {
 	return &todo, nil
 }
 
-func (r todoRepositoryDB) UpdateTodo(id int, todo Todo) (*Todo, error) {
+func (r todoRepositoryDB) UpdateTodo(id int, body string, isCompleted bool) (*Todo, error) {
 	query := `
 				UPDATE todo 
 				SET body = ?, complete = ?
 				WHERE id = ?
 			`
-	_, err := r.db.Exec(query, todo.Body, todo.Complete, id)
+	_, err := r.db.Exec(query, body, isCompleted, id)
 	if err != nil {
 		return nil, err
+	}
+
+	todo := Todo{
+		Id:       id,
+		Body:     body,
+		Complete: isCompleted,
 	}
 
 	return &todo, nil
