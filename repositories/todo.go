@@ -11,4 +11,6 @@ type TodoRepository interface {
 	GetAll() ([]Todo, error)
 	GetById(int) (*Todo, error)
 	CreateTodo(todo Todo) (*Todo, error)
+	UpdateTodo(id, int, todo Todo) (*Todo, error)
+	DeleteTodo(id int) error
 }

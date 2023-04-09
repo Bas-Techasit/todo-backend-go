@@ -12,7 +12,10 @@ func NewCustomerRepository(db *sqlx.DB) TodoRepository {
 
 func (r todoRepositoryDB) GetAll() ([]Todo, error) {
 	todos := []Todo{}
-	query := "SELECT id, body, complete, create_date FROM todo"
+	query := `
+				SELECT id, body, complete, create_date 
+				FROM todo"
+			`
 	err := r.db.Select(&todos, query)
 	if err != nil {
 		return nil, err
@@ -51,4 +54,31 @@ func (r todoRepositoryDB) CreateTodo(todo Todo) (*Todo, error) {
 	}
 
 	return &todo, nil
+}
+
+func (r todoRepositoryDB) UpdateTodo(id int, todo Todo) (*Todo, error) {
+	query := `
+				UPDATE todo 
+				SET body = ?, complete = ?
+				WHERE id = ?
+			`
+	_, err := r.db.Exec(query, todo.Body, todo.Complete, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
+}
+
+func (r todoRepositoryDB) DeleteTodo(id int) error {
+	query := `
+				DELETE FROM todo
+				WHERE id = ?
+			`
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
