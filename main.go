@@ -5,13 +5,13 @@ import (
 	"strings"
 	"time"
 	"todo-backend/handlers"
-	"todo-backend/logs"
 	"todo-backend/repositories"
 	"todo-backend/services"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	fiberjwt "github.com/gofiber/jwt/v3"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
@@ -26,17 +26,28 @@ func main() {
 	todoService := services.NewTodoService(todoRepository)
 	todoHandler := handlers.NewTodoHandler(todoService)
 
+	userRepository := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepository)
+	userHandler := handlers.NewUserHandler(userService)
+
 	app := fiber.New()
 
 	app.Use(logger.New())
+	app.Use("todos", fiberjwt.New(fiberjwt.Config{
+		SigningMethod:  "HS256",
+		SigningKey:     []byte(viper.GetString("app.secret")),
+		SuccessHandler: func(c *fiber.Ctx) error { return c.Next() },
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return fiber.ErrUnauthorized
+		},
+	}))
 
 	app.Get("/todos/username/:username", todoHandler.GetTodos)
-	// app.Get("/todo/:todoId", todoHandler.GetTodo)
-	app.Post("/todo/username/:username", todoHandler.NewTodo)
+	app.Post("/todos/username/:username", todoHandler.NewTodo)
+	app.Post("/signup", userHandler.SignUp)
+	app.Post("login", userHandler.Login)
 	// app.Put("/todo/:todoId", todoHandler.UpdateTodo)
 	// app.Delete("/todo/:todoId", todoHandler.DeleteTodo)
-
-	logs.Info("Todo server is running on port " + viper.GetString("app.port"))
 	app.Listen(":" + viper.GetString("app.port"))
 
 }

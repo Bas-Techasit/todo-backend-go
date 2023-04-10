@@ -41,7 +41,7 @@ func (h todoHandler) NewTodo(c *fiber.Ctx) error {
 	todo := services.NewTodoRequest{}
 	err := c.BodyParser(&todo)
 	if err != nil {
-		return fiber.ErrUnprocessableEntity
+		return err
 	}
 
 	todoResponse, err := h.todoSrv.NewTodo(username, todo)
