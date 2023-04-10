@@ -18,8 +18,8 @@ func NewTodoService(todoRepo repositories.TodoRepository) TodoService {
 	return todoService{todoRepo: todoRepo}
 }
 
-func (s todoService) GetTodos() ([]TodoResponse, error) {
-	todos, err := s.todoRepo.GetAll()
+func (s todoService) GetTodos(username string) ([]TodoResponse, error) {
+	todos, err := s.todoRepo.GetAll(username)
 	if err != nil {
 		logs.Error(err)
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "unexpected error")
@@ -27,47 +27,48 @@ func (s todoService) GetTodos() ([]TodoResponse, error) {
 	todoResponses := []TodoResponse{}
 	for _, t := range todos {
 		todoResponse := TodoResponse{
-			Id:       t.Id,
+			Id:       t.TodoID,
 			Body:     t.Body,
-			Complete: t.Complete,
+			Complete: t.Status,
 		}
 		todoResponses = append(todoResponses, todoResponse)
 	}
 	return todoResponses, nil
 }
 
-func (s todoService) GetTodo(id string) (*TodoResponse, error) {
-	todo, err := s.todoRepo.GetById(id)
-	if err != nil {
+// func (s todoService) GetTodo(id string) (*TodoResponse, error) {
+// 	todo, err := s.todoRepo.GetById(id)
+// 	if err != nil {
 
-		if err == sql.ErrNoRows {
-			return nil, fiber.NewError(fiber.StatusNotFound, "todo not fonud")
-		}
+// 		if err == sql.ErrNoRows {
+// 			return nil, fiber.NewError(fiber.StatusNotFound, "todo not fonud")
+// 		}
 
-		logs.Error(err)
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "unexpected error")
+// 		logs.Error(err)
+// 		return nil, fiber.NewError(fiber.StatusInternalServerError, "unexpected error")
 
-	}
+// 	}
 
-	todoResponse := TodoResponse{
-		Id:       todo.Id,
-		Body:     todo.Body,
-		Complete: todo.Complete,
-	}
-	return &todoResponse, nil
-}
+// 	todoResponse := TodoResponse{
+// 		Id:       todo.Id,
+// 		Body:     todo.Body,
+// 		Complete: todo.Complete,
+// 	}
+// 	return &todoResponse, nil
+// }
 
-func (s todoService) NewTodo(new NewTodoRequest) (*TodoResponse, error) {
+func (s todoService) NewTodo(username string, res NewTodoRequest) (*TodoResponse, error) {
 
-	if new.Body == "" {
+	if res.Body == "" {
 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "body not empty")
 	}
 
 	todo := repositories.Todo{
-		Id:         uuid.NewString(),
-		Body:       new.Body,
-		Complete:   false,
-		CreateDate: time.Now(),
+		TodoID:     uuid.NewString(),
+		Body:       res.Body,
+		Status:     false,
+		CreateDate: time.Now().Format("2006-1-2 15:04:05"),
+		Username:   username,
 	}
 
 	created, err := s.todoRepo.CreateTodo(todo)
@@ -77,32 +78,32 @@ func (s todoService) NewTodo(new NewTodoRequest) (*TodoResponse, error) {
 	}
 
 	todoResponse := TodoResponse{
-		Id:       created.Id,
+		Id:       created.TodoID,
 		Body:     created.Body,
-		Complete: created.Complete,
+		Complete: created.Status,
 	}
 	return &todoResponse, nil
 }
 
-func (s todoService) EditTodo(id string, e EditTodoRequest) (*TodoResponse, error) {
-	if e.Body == "" {
-		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "body not empty")
-	}
+// func (s todoService) EditTodo(id string, e EditTodoRequest) (*TodoResponse, error) {
+// 	if e.Body == "" {
+// 		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "body not empty")
+// 	}
 
-	updatedTodo, err := s.todoRepo.UpdateTodo(id, e.Body, e.Complete)
-	if err != nil {
-		logs.Error(err)
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "unexpected error")
-	}
+// 	updatedTodo, err := s.todoRepo.UpdateTodo(id, e.Body, e.Complete)
+// 	if err != nil {
+// 		logs.Error(err)
+// 		return nil, fiber.NewError(fiber.StatusInternalServerError, "unexpected error")
+// 	}
 
-	todoResponse := TodoResponse{
-		Id:       updatedTodo.Id,
-		Body:     updatedTodo.Body,
-		Complete: updatedTodo.Complete,
-	}
+// 	todoResponse := TodoResponse{
+// 		Id:       updatedTodo.Id,
+// 		Body:     updatedTodo.Body,
+// 		Complete: updatedTodo.Complete,
+// 	}
 
-	return &todoResponse, nil
-}
+// 	return &todoResponse, nil
+// }
 
 func (s todoService) DeleteTodo(id string) error {
 	err := s.todoRepo.DeleteTodo(id)

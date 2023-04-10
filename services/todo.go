@@ -1,10 +1,10 @@
 package services
 
 type TodoService interface {
-	GetTodos() ([]TodoResponse, error)
-	GetTodo(string) (*TodoResponse, error)
-	NewTodo(NewTodoRequest) (*TodoResponse, error)
-	EditTodo(string, EditTodoRequest) (*TodoResponse, error)
+	GetTodos(string) ([]TodoResponse, error)
+	// GetTodo(string) (*TodoResponse, error)
+	NewTodo(string, NewTodoRequest) (*TodoResponse, error)
+	// EditTodo(string, EditTodoRequest) (*TodoResponse, error)
 	DeleteTodo(string) error
 }
 

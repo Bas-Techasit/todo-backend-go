@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
@@ -27,11 +28,13 @@ func main() {
 
 	app := fiber.New()
 
-	app.Get("/todos", todoHandler.GetTodos)
-	app.Get("/todo/:todoId", todoHandler.GetTodo)
-	app.Post("/todo", todoHandler.NewTodo)
-	app.Put("/todo/:todoId", todoHandler.UpdateTodo)
-	app.Delete("/todo/:todoId", todoHandler.DeleteTodo)
+	app.Use(logger.New())
+
+	app.Get("/todos/username/:username", todoHandler.GetTodos)
+	// app.Get("/todo/:todoId", todoHandler.GetTodo)
+	app.Post("/todo/username/:username", todoHandler.NewTodo)
+	// app.Put("/todo/:todoId", todoHandler.UpdateTodo)
+	// app.Delete("/todo/:todoId", todoHandler.DeleteTodo)
 
 	logs.Info("Todo server is running on port " + viper.GetString("app.port"))
 	app.Listen(":" + viper.GetString("app.port"))
