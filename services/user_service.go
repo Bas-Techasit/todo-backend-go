@@ -1,12 +1,11 @@
 package services
 
 import (
-	"fmt"
 	"todo-backend/logs"
 	"todo-backend/repositories"
 
-	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -31,7 +30,6 @@ func (s userService) Login(userReq UserLoginRequest) (*UserLoginResponse, error)
 
 	user, err := s.userRepo.GetUser(userReq.Username)
 	if err != nil {
-		fmt.Println("get user")
 		return nil, fiber.NewError(
 			fiber.StatusUnprocessableEntity,
 			"username or password is incorrect",
@@ -40,7 +38,7 @@ func (s userService) Login(userReq UserLoginRequest) (*UserLoginResponse, error)
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userReq.Password))
 	if err != nil {
-		logs.Error(err)
+		// logs.Error(err)
 		return nil, fiber.NewError(
 			fiber.StatusUnprocessableEntity,
 			"username or password is incorrect",
@@ -48,7 +46,7 @@ func (s userService) Login(userReq UserLoginRequest) (*UserLoginResponse, error)
 	}
 
 	// generate token
-	cliams := jwt.StandardClaims{Issuer: user.Username}
+	cliams := jwt.RegisteredClaims{Issuer: userReq.Username}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, cliams)
 
 	var token string
@@ -82,6 +80,7 @@ func (s userService) SignUp(userReq UserSignUpRequest) (*UserResponse, error) {
 			"unexpected error",
 		)
 	}
+
 	var user *repositories.User
 	user, err = s.userRepo.CreateUser(repositories.User{
 		Username: userReq.Username,
