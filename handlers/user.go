@@ -23,6 +23,7 @@ func (h userHandler) Login(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
 	return c.JSON(userRes)
 }
 

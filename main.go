@@ -26,8 +26,9 @@ func main() {
 	todoService := services.NewTodoService(todoRepository)
 	todoHandler := handlers.NewTodoHandler(todoService)
 
-	userRepository := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepository)
+	// userRepository := repositories.NewUserRepository(db)
+	userRepositoryMock := repositories.NewUserRepositoryMock()
+	userService := services.NewUserService(userRepositoryMock)
 	userHandler := handlers.NewUserHandler(userService)
 
 	app := fiber.New()
