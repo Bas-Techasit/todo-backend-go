@@ -46,7 +46,7 @@ func TestLoginShouldBePass(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			if !reflect.DeepEqual(got, tt.want) || got.Token == tt.want.Token {
+			if got.Username != tt.want.Username || got.Token == "" {
 				t.Errorf("got %v want %v", got, tt.want)
 			}
 		})
