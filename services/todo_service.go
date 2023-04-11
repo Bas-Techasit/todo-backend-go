@@ -39,7 +39,10 @@ func (s todoService) GetTodos(username string) ([]TodoResponse, error) {
 func (s todoService) NewTodo(username string, res NewTodoRequest) (*TodoResponse, error) {
 
 	if res.Body == "" {
-		return nil, fiber.NewError(fiber.StatusUnprocessableEntity, "body not empty")
+		return nil, fiber.NewError(
+			fiber.StatusUnprocessableEntity,
+			"body not empty",
+		)
 	}
 
 	todo := repositories.Todo{
@@ -67,14 +70,10 @@ func (s todoService) NewTodo(username string, res NewTodoRequest) (*TodoResponse
 func (s todoService) EditTodo(username, todoID string, updateReq UpdateTodoRequest) (*TodoResponse, error) {
 	oldTodo, err := s.todoRepo.GetById(username, todoID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fiber.NewError(
-				fiber.StatusNotFound,
-				"todo not found",
-			)
-		}
-		logs.Error(err)
-		return nil, fiber.ErrInternalServerError
+		return nil, fiber.NewError(
+			fiber.StatusNotFound,
+			"todo not found",
+		)
 	}
 
 	if updateReq.Body == "" {
