@@ -28,8 +28,10 @@ func (r *todoRepositoryMock) GetAll(username string) ([]Todo, error) {
 	for _, t := range r.todos {
 		if t.Username == username {
 			res = append(res, t)
-			return res, nil
 		}
+	}
+	if res != nil {
+		return res, nil
 	}
 	return nil, errors.New("username not found")
 }
