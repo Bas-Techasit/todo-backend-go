@@ -33,7 +33,7 @@ func main() {
 	app := fiber.New()
 
 	app.Use(logger.New())
-	app.Use("todos", fiberjwt.New(fiberjwt.Config{
+	app.Use("/todos", fiberjwt.New(fiberjwt.Config{
 		SigningMethod:  "HS256",
 		SigningKey:     []byte(viper.GetString("app.secret")),
 		SuccessHandler: func(c *fiber.Ctx) error { return c.Next() },
@@ -44,10 +44,12 @@ func main() {
 
 	app.Get("/todos/username/:username", todoHandler.GetTodos)
 	app.Post("/todos/username/:username", todoHandler.NewTodo)
+	app.Put("/todos/:todoID/username/:username", todoHandler.UpdateTodo)
+	app.Delete("/todos/:todoID/username/:username", todoHandler.DeleteTodo)
+
 	app.Post("/signup", userHandler.SignUp)
-	app.Post("login", userHandler.Login)
-	// app.Put("/todo/:todoId", todoHandler.UpdateTodo)
-	// app.Delete("/todo/:todoId", todoHandler.DeleteTodo)
+	app.Post("/login", userHandler.Login)
+
 	app.Listen(":" + viper.GetString("app.port"))
 
 }

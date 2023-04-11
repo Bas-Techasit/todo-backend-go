@@ -2,23 +2,22 @@ package services
 
 type TodoService interface {
 	GetTodos(string) ([]TodoResponse, error)
-	// GetTodo(string) (*TodoResponse, error)
 	NewTodo(string, NewTodoRequest) (*TodoResponse, error)
-	// EditTodo(string, EditTodoRequest) (*TodoResponse, error)
-	DeleteTodo(string) error
+	EditTodo(string, string, UpdateTodoRequest) (*TodoResponse, error)
+	DeleteTodo(string, string) error
 }
 
 type NewTodoRequest struct {
 	Body string `json:"body"`
 }
 
-type EditTodoRequest struct {
-	Body     string `json:"body"`
-	Complete bool   `json:"complete"`
+type UpdateTodoRequest struct {
+	Body   string `json:"body"`
+	Status bool   `json:"status"`
 }
 
 type TodoResponse struct {
-	Id       string `json:"id"`
-	Body     string `json:"body"`
-	Complete bool   `json:"complete"`
+	TodoID string `json:"id"`
+	Body   string `json:"body"`
+	Status bool   `json:"status"`
 }

@@ -25,17 +25,6 @@ func (h todoHandler) GetTodos(c *fiber.Ctx) error {
 	return c.JSON(todos)
 }
 
-// func (h todoHandler) GetTodo(c *fiber.Ctx) error {
-// 	todoId := c.Params("todoId")
-
-// 	todo, err := h.todoSrv.GetTodo(todoId)
-// 	if err != nil {
-// 		return fiber.NewError(fiber.StatusNotFound, "todo not found")
-// 	}
-
-// 	return c.JSON(todo)
-// }
-
 func (h todoHandler) NewTodo(c *fiber.Ctx) error {
 	username := c.Params("username")
 	todo := services.NewTodoRequest{}
@@ -52,24 +41,26 @@ func (h todoHandler) NewTodo(c *fiber.Ctx) error {
 	return c.JSON(todoResponse)
 }
 
-// func (h todoHandler) UpdateTodo(c *fiber.Ctx) error {
-// 	todoId := c.Params("todoId")
+func (h todoHandler) UpdateTodo(c *fiber.Ctx) error {
+	username := c.Params("username")
+	todoID := c.Params("todoID")
+	todo := services.UpdateTodoRequest{}
+	err := c.BodyParser(&todo)
+	if err != nil {
+		return err
+	}
 
-// 	todo := services.EditTodoRequest{}
-// 	err := c.BodyParser(&todo)
-// 	if err != nil {
-// 		return fiber.ErrUnprocessableEntity
-// 	}
+	var todoResponse *services.TodoResponse
+	todoResponse, err = h.todoSrv.EditTodo(username, todoID, todo)
+	if err != nil {
+		return err
+	}
 
-// 	todoResponse, err := h.todoSrv.EditTodo(todoId, todo)
-// 	if err != nil {
-// 		return err
-// 	}
+	return c.JSON(todoResponse)
+}
 
-// 	return c.JSON(todoResponse)
-// }
-
-// func (h todoHandler) DeleteTodo(c *fiber.Ctx) error {
-// 	todoId := c.Params("todoId")
-// 	return h.todoSrv.DeleteTodo(todoId)
-// }
+func (h todoHandler) DeleteTodo(c *fiber.Ctx) error {
+	username := c.Params("username")
+	todoID := c.Params("todoID")
+	return h.todoSrv.DeleteTodo(username, todoID)
+}
